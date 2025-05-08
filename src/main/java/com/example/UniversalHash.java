@@ -12,17 +12,19 @@ public class UniversalHash {
     public final long b;   // Additive shift (offset/increment coefficient) — adds randomness
     private final long p;  // Prime modulus — controls arithmetic space, affects collisions
     private final long m;  // Hash table size — determines the range of the hash function
+    private final int base; // Base for polynomial roll (e.g., like x in x^i) — randomized to reduce clustering
 
     /**
      * Constructs a universal hash function with a random seed.
      * @param m Hash table size
-     * @param seed A fixed seed for deterministic behavior
+     * @param rand A fixed seed for deterministic behavior
      */
     public UniversalHash(long m, Random rand) {
         this.m = m;
         this.p = getRandomLargePrime(61, rand);
         this.a = (Math.abs(rand.nextLong()) % (p - 1)) + 1;
         this.b = Math.abs(rand.nextLong() % p);
+        this.base = getRandomBase(rand); // Randomized base
     }    
 
     /**
@@ -35,6 +37,7 @@ public class UniversalHash {
         this.p = getRandomLargePrime(61, rand);
         this.a = (Math.abs(rand.nextLong()) % (p - 1)) + 1;
         this.b = Math.abs(rand.nextLong() % p);
+        this.base = getRandomBase(rand); // Randomized base
     }    
 
     /**
@@ -49,6 +52,7 @@ public class UniversalHash {
         this.a = a;
         this.b = b;
         this.p = p;
+        this.base = 37; // Default fixed base for consistency — can be modified
     }
 
     public long hash(String key) {
@@ -71,11 +75,11 @@ public class UniversalHash {
         if (key == null) {
             throw new IllegalArgumentException("Key cannot be null");
         }
+        // Return a small prime if string is empty, avoids zero hash
         if (key.isEmpty()) {
-            return 17;    // Return a small prime if string is empty, avoids zero hash
+            return 17;
         }
         long hash = 0;
-        final int base = 37;    // Base for polynomial roll (e.g., like x in x^i) — affects how characters are weighted by position
         // Build the polynomial hash (key[0]*base^0 + key[1]*base^1 + key[2]*base^2 + ...) mod p
         for (int i = 0; i < key.length(); i++) {
             // Multiply and mod at every step to avoid overflow
@@ -93,8 +97,14 @@ public class UniversalHash {
         return prime.longValue();
     }
 
+    private static int getRandomBase(Random rand) {
+        // Pick base in [31, 127]
+        int[] goodBases = {31, 33, 37, 39, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127};
+        return goodBases[rand.nextInt(goodBases.length)];
+    }
+
     @Override
     public String toString() {
-        return String.format("UniversalHash(m=%d, a=%d, b=%d, p=%d)", m, a, b, p);
+        return String.format("UniversalHash(m=%d, a=%d, b=%d, p=%d, base=%d)", m, a, b, p, base);
     }
 }
