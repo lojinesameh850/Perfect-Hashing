@@ -8,11 +8,11 @@ import java.math.BigInteger;
  * Supports deterministic construction via seed or explicit parameters.
  */
 public class UniversalHash {
-    public final long a;   // Multiplier in universal hash — affects final distribution
-    public final long b;   // Additive shift (offset/increment coefficient) — adds randomness
-    private final long p;  // Prime modulus — controls arithmetic space, affects collisions
-    private final long m;  // Hash table size — determines the range of the hash function
-    private final int base; // Base for polynomial roll (e.g., like x in x^i) — randomized to reduce clustering
+    public final long a;       // Multiplier in universal hash — affects final distribution
+    public final long b;       // Additive shift (offset/increment coefficient) — adds randomness
+    private final long p;      // Prime modulus — controls arithmetic space, affects collisions
+    private final long m;      // Hash table size — determines the range of the hash function
+    private final int base;    // Base for polynomial roll (e.g., like x in x^i) — randomized to reduce clustering
 
     /**
      * Constructs a universal hash function with a random seed.
